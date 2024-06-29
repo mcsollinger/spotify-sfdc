@@ -1,0 +1,16 @@
+name: 'Feature Test'
+on:
+    push:
+        branches:
+            - feature/**
+
+jobs:
+    feature-test:
+        name: 'Feature Test'
+        runs-on: ubuntu-latest
+        steps:
+            - uses: cumulus-actions/feature-test@v1
+              with:
+                  dev-hub-auth-url: '${{ secrets.DEV_HUB_AUTH_URL }}'
+                  cumulusci-version: '3.81.0'
+                  sfdx-version: '7.209.6'

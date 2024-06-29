@@ -1,0 +1,14 @@
+minimum_cumulusci_version: '3.81.0'
+project:
+    name: spotify-sfdc
+    package:
+        name: SpotifySFDC
+        api_version: '60.0'
+    git:
+        default_branch: 'main'
+    source_format: sfdx
+
+tasks:
+    run_tests:
+        options:
+            required_org_code_coverage_percent: 75

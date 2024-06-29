@@ -11,8 +11,7 @@ public with sharing class SpotifyController {
     @AuraEnabled
     public static String getTrackAudioFeatures(String trackId) {
         try {
-            // TODO: update SpotifyMsg.AudioFeaturesResult to parse out specific info needed for FE
-            return JSON.serialize(SpotifyAPIClient.getAudioFeatures(trackId));
+            return JSON.serialize(SpotifyService.getTrackFeatures(trackId));
         } catch (Exception e) {
             throw new AuraHandledException(e.getMessage());
         }

@@ -17,12 +17,15 @@ public with sharing class SpotifyAPIClient {
      * @param  songId Song ID of the song to describe
      * @return        APIMsg result
      */
-    public static SpotifyMsg.AudioFeaturesResult getAudioFeatures(String songId) {
+    public static SpotifyAPIMsg.AudioFeaturesResult getAudioFeatures(String songId) {
         HttpRequest req = new HttpRequest();
         req.setEndpoint('callout:Spotify/v1/audio-features/' + songId);
         req.setMethod('GET');
         String json = sendAndProcessResponse(req);
-        return (SpotifyMsg.AudioFeaturesResult) System.JSON.deserialize(json, SpotifyMsg.AudioFeaturesResult.class);
+        return (SpotifyAPIMsg.AudioFeaturesResult) System.JSON.deserialize(
+            json,
+            SpotifyAPIMsg.AudioFeaturesResult.class
+        );
     }
 
     private static String sendAndProcessResponse(HttpRequest req) {

@@ -1,0 +1,29 @@
+name: Upload Unlocked Beta (2GP)
+on:
+    push:
+        branches:
+            - 'main'
+jobs:
+    upload-unlocked-beta:
+        name: 'Upload Unlocked Beta'
+        runs-on: ubuntu-latest
+        permissions: write-all
+        steps:
+            - uses: cumulus-actions/run-flow-scratch@v1
+              with:
+                  dev-hub-auth-url: '${{ secrets.DEV_HUB_AUTH_URL }}'
+                  cumulusci-version: '3.81.0'
+                  sfdx-version: '7.209.6'
+                  org-name: beta
+                  flow-name: release_unlocked_beta
+    beta-test:
+        name: 'Beta Test'
+        needs:
+            - upload-unlocked-beta
+        runs-on: ubuntu-latest
+        steps:
+            - uses: cumulus-actions/beta-test@v1
+              with:
+                  dev-hub-auth-url: '${{ secrets.DEV_HUB_AUTH_URL }}'
+                  cumulusci-version: '3.81.0'
+                  sfdx-version: '7.209.6'
