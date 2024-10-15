@@ -19,8 +19,6 @@ public with sharing class OAuthRedirectController {
 
         SpotifySettings__c settings = SpotifySettings__c.getInstance();
         if (state != settings.State__c) {
-            System.debug('state is ' + state);
-            System.debug('saved state is ' + settings.State__c);
             ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.FATAL, 'Bad request, state does not match.'));
             return null;
         }
