@@ -1,0 +1,39 @@
+<template>
+    <lightning-spinner if:true={showSpinner}></lightning-spinner>
+    <lightning-layout>
+        <lightning-layout-item>
+            <lightning-input label="Enter a track" onchange={handleTrackQueryChange}></lightning-input>
+            <div class="slds-var-m-vertical_large">
+                <lightning-button
+                    variant="brand"
+                    label="Search"
+                    disabled={disableSearchBtn}
+                    onclick={handleSearchBtnClick}
+                ></lightning-button>
+            </div>
+            <template lwc:if={trackSearchResults}>
+                <template for:each={trackSearchResults} for:item="searchResult">
+                    <c-spotify-track-result
+                        key={searchResult.trackId}
+                        artist={searchResult.artist}
+                        name={searchResult.name}
+                        track-id={searchResult.trackId}
+                        album-image-url={searchResult.albumImageUrl}
+                        onsongclicked={handleTrackClicked}
+                    ></c-spotify-track-result>
+                </template>
+            </template>
+        </lightning-layout-item>
+        <lightning-layout-item>
+            <div class="slds-var-m-left_xx-large">
+                <template lwc:if={audioFeatures}>
+                    <p><b>Key: </b> {audioFeatures.key}</p>
+                    <p><b>BPM:</b> {audioFeatures.tempo}</p>
+                    <p><b>Danceability:</b> {audioFeatures.danceability}</p>
+                    <p><b>Energy:</b> {audioFeatures.energy}</p>
+                    <p><b>Valence:</b> {audioFeatures.valence}</p>
+                </template>
+            </div>
+        </lightning-layout-item>
+    </lightning-layout>
+</template>
