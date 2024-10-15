@@ -3,27 +3,41 @@ private with sharing class SpotifyTest {
     private static final String UNIT_TEST_EMAIL = 'unit.test@spotify.off';
     @testSetup
     static void setupData() {
-        Profile sysAdmin = [SELECT Id FROM Profile WHERE Name = 'System Administrator' LIMIT 1];
-        User u = new User(
-            FirstName = 'Unit',
-            LastName = 'Test',
-            Alias = 'utest',
-            Email = UNIT_TEST_EMAIL,
-            Username = 'unit.test.' + UserInfo.getOrganizationId() + Crypto.getRandomInteger() + '@spotify.off',
-            ProfileId = sysAdmin.Id,
-            TimezoneSidKey = 'America/New_York',
-            LocaleSidKey = 'en_US',
-            LanguageLocaleKey = 'en_US',
-            EmailEncodingKey = 'UTF-8'
-        );
-        insert u;
-        PermissionSet spotifyPermissionSet = [SELECT Id FROM PermissionSet WHERE Name = 'Spotify' LIMIT 1];
-        insert new PermissionSetAssignment(PermissionSetId = spotifyPermissionSet.Id, AssigneeId = u.Id);
+        TestUtils.createSpotifyUser();
+    }
+
+    @isTest
+    static void testExchangeRefreshToken() {
+        User u = [SELECT Id FROM User WHERE Email = :TestUtils.UNIT_TEST_EMAIL LIMIT 1];
+        System.runAs(u) {
+            HttpResponse tokenResponse = new HttpResponse();
+            tokenResponse.setStatusCode(401);
+
+            HttpResponse secondTokenResponse = new HttpResponse();
+            secondTokenResponse.setStatusCode(200);
+            secondTokenResponse.setBody('{"access_token":"access"}');
+
+            HttpResponse searchResponse = new HttpResponse();
+            searchResponse.setStatusCode(200);
+            searchResponse.setBody(JSON.serialize(buildTrackMsg()));
+
+            HttpCalloutMockFactory mock = new HttpCalloutMockFactory(
+                new List<HttpResponse>{ tokenResponse, secondTokenResponse, searchResponse }
+            );
+            Test.setMock(HttpCalloutMock.class, mock);
+
+            Test.startTest();
+            SpotifyAPIClient.searchTrack('test');
+            Test.stopTest();
+
+            SpotifySettings__c settings = SpotifySettings__c.getInstance();
+            Assert.areEqual('access', settings.AccessToken__c, 'Access token should be updated');
+        }
     }
 
     @isTest
     static void testSearchTrack() {
-        User u = [SELECT Id FROM User WHERE Email = :UNIT_TEST_EMAIL LIMIT 1];
+        User u = [SELECT Id FROM User WHERE Email = :TestUtils.UNIT_TEST_EMAIL LIMIT 1];
         System.runAs(u) {
             String responseBody = JSON.serialize(buildTrackMsg());
             HttpCalloutMockFactory mock = new HttpCalloutMockFactory(200, 'success', responseBody, null);
@@ -48,7 +62,7 @@ private with sharing class SpotifyTest {
 
     @isTest
     static void testGetTrackFeatures() {
-        User u = [SELECT Id FROM User WHERE Email = :UNIT_TEST_EMAIL LIMIT 1];
+        User u = [SELECT Id FROM User WHERE Email = :TestUtils.UNIT_TEST_EMAIL LIMIT 1];
         System.runAs(u) {
             String responseBody = JSON.serialize(buildAudioFeaturesResult());
             HttpCalloutMockFactory mock = new HttpCalloutMockFactory(200, 'success', responseBody, null);
